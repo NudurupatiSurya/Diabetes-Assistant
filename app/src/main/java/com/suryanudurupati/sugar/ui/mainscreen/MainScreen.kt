@@ -1,17 +1,15 @@
-package com.suryanudurupati.sugar.MainScreen
+package com.suryanudurupati.sugar.ui.mainscreen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.suryanudurupati.sugar.MainScreen.ui.AnswerUI
-import com.suryanudurupati.sugar.MainScreen.ui.SpeakUI
 import com.suryanudurupati.sugar.ui.theme.SugarTheme
 
 @Composable
 fun MainScreen() {
     Column {
-        SpeakUI()
-        AnswerUI()
+        SpeakBox()
+        AnswerBox()
     }
 }
 

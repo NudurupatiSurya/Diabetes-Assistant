@@ -1,4 +1,4 @@
-package com.suryanudurupati.sugar.MainScreen.ui
+package com.suryanudurupati.sugar.ui.mainscreen
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.suryanudurupati.sugar.ui.components.Mic
 
 @Composable
-fun SpeakUI(modifier: Modifier = Modifier) {
+fun SpeakBox(modifier: Modifier = Modifier) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Mic(
             Modifier

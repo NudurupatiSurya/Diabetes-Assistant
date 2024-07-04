@@ -9,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.suryanudurupati.sugar.MainScreen.MainScreen
+import com.suryanudurupati.sugar.ui.mainscreen.MainScreen
 import com.suryanudurupati.sugar.ui.theme.SugarTheme
 
 class MainActivity : ComponentActivity() {
