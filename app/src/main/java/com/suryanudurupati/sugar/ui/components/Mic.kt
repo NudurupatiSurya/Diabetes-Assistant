@@ -59,6 +59,7 @@ fun Mic(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewModel(
             // TODO: Record Audio
             if (isRecording) {
                 mainViewModel.stopRecording()
+                mainViewModel.transcribeAudio()
             } else {
                 mainViewModel.startRecording()
             }

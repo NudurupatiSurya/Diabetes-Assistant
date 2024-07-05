@@ -7,13 +7,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.suryanudurupati.sugar.ui.components.Mic
+import com.suryanudurupati.sugar.viewmodel.MainViewModel
 
 @Composable
-fun SpeakBox(modifier: Modifier = Modifier) {
+fun SpeakBox(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewModel()) {
+    val transcribedText by mainViewModel.transcription.observeAsState("")
     Row(verticalAlignment = Alignment.CenterVertically) {
         Mic(
             Modifier
@@ -24,7 +29,7 @@ fun SpeakBox(modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .padding(10.dp) // TODO:: Add animateContentSize later
         ) {
-            Text("అరటి పండు", Modifier.padding(10.dp))
+            Text("$transcribedText", Modifier.padding(10.dp))
         }
     }
 }
