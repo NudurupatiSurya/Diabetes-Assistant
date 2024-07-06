@@ -18,11 +18,12 @@ class ChatRepo {
 
     suspend fun getChatGPTResponse(transcription: String): String? {
         val messages = listOf(
-            Message(role = "system", content = "You are a health advisor who gives answer concisely" +
-                    " whether your patients can eat the food they specified or not" +
-                    ". Also User gives their food item name in telugu language" +
-                    " So while Answering please tell the fruit name in english and tell in telugu whether they can eat it or not"),
-            Message(role = "user", content = "Can a person with diabetes eat the following food: $transcription")
+            Message(role = "system", content = "You are a diabetic health advisor. You should tell " +
+                    "user whether they can eat a particular food or not concisely.Text will be sent " +
+                    "to you in English, but try to find out the native language of it and answer in " +
+                    "that language. For example if user sends you “Aarti pandu” then you should find " +
+                    "out that this is Telugu language and answer in Telugu."),
+            Message(role = "user", content = "Can I eat $transcription")
         )
 
         val request = ChatGPTRequest(

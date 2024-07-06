@@ -5,6 +5,7 @@ import com.suryanudurupati.sugar.model.ChatGPTResponse
 import com.suryanudurupati.sugar.model.TranscriptionResponseModel
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.Response
 import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.Multipart
@@ -18,7 +19,7 @@ interface APIService {
         @Header("Authorization") authorization: String,
         @Part audio: MultipartBody.Part,
         @Part("model") model: RequestBody,
-        @Part("language") language: RequestBody
+        @Part("prompt") prompt: RequestBody
     ): TranscriptionResponseModel
 
     @POST("v1/chat/completions")

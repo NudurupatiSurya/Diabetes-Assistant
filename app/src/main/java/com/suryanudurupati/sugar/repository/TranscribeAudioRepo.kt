@@ -25,10 +25,10 @@ class TranscribeAudioRepo {
         val requestFile = file.asRequestBody("audio/wav".toMediaTypeOrNull())
         val audioPart = MultipartBody.Part.createFormData("file", file.name, requestFile)
         val model = "whisper-1".toRequestBody("text/plain".toMediaTypeOrNull())
-        val languagePart = language.toRequestBody("text/plain".toMediaTypeOrNull())
+        val prompt = "తెలుగు".toRequestBody("text/plain".toMediaTypeOrNull())
 
         return try {
-            val response = service.transcribeAudio("Bearer $APIKEY", audioPart, model, languagePart)
+            val response = service.transcribeAudio("Bearer $APIKEY", audioPart, model, prompt)
             response.text
         } catch (e: HttpException) {
             val errorBody = e.response()?.errorBody()?.string()
