@@ -4,17 +4,14 @@ import android.util.Log
 import com.suryanudurupati.sugar.model.ChatGPTRequest
 import com.suryanudurupati.sugar.model.Message
 import com.suryanudurupati.sugar.network.APIService
+import com.suryanudurupati.sugar.network.RetrofitObject
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class ChatRepo {
-    private val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.openai.com/")
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
 
-    private val service = retrofit.create(APIService::class.java)
+    private val service = RetrofitObject.service
 
     suspend fun getChatGPTResponse(transcription: String): String? {
         val messages = listOf(
