@@ -20,7 +20,6 @@ import com.suryanudurupati.sugar.viewmodel.MainViewModel
 @Composable
 fun SpeakBox(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewModel()) {
     val transcribedText by mainViewModel.transcription.observeAsState("")
-    val isLoading by mainViewModel.isLoading.observeAsState(false)
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Mic(

@@ -3,11 +3,8 @@ package com.suryanudurupati.sugar.repository
 import android.util.Log
 import com.suryanudurupati.sugar.model.ChatGPTRequest
 import com.suryanudurupati.sugar.model.Message
-import com.suryanudurupati.sugar.network.APIService
 import com.suryanudurupati.sugar.network.RetrofitObject
 import retrofit2.HttpException
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class ChatRepo {
 

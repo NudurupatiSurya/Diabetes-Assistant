@@ -54,9 +54,7 @@ fun Mic(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewModel(
 
     Surface(onClick = {
         if (microphonePermissionState.status.isGranted) {
-            if (isRecording) {
-                // Nothing to do, as SpeechRecognizer will handle stopping automatically
-            } else {
+            if (!isRecording) {
                 mainViewModel.startListening()
             }
         } else {

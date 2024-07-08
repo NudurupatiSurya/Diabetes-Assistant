@@ -17,7 +17,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             SugarTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -28,9 +27,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-/*TODO:: Take Mic Permission, Record Audio, Translate to English,
-TODO:: send it to chatGPT, retrieve response, convert to telugu, speak it out loud*/
 
 @Preview
 @Composable
