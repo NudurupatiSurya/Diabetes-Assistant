@@ -1,8 +1,13 @@
 package com.suryanudurupati.sugar.viewmodel
 
 import android.app.Application
+import android.content.Intent
 import android.media.MediaPlayer
 import android.media.MediaRecorder
+import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.util.Base64
 import android.util.Log
@@ -18,16 +23,15 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.Locale
 
+
 class MainViewModel(application: Application) : AndroidViewModel(application), TextToSpeech.OnInitListener {
-    private var mediaRecorder: MediaRecorder? = null
-    private var audioFilePath: String? = null
+    private var speechRecognizer: SpeechRecognizer? = null
     private var tts: TextToSpeech? = null
+
+    private val chatRepo = ChatRepo()
 
     private val _isRecording = MutableLiveData<Boolean>()
     val isRecording: LiveData<Boolean> get() = _isRecording
-
-    private val audioRepository = TranscribeAudioRepo()
-    private val chatRepo = ChatRepo()
 
     private val _transcription = MutableLiveData<String?>()
     val transcription: MutableLiveData<String?> get() = _transcription
@@ -37,70 +41,59 @@ class MainViewModel(application: Application) : AndroidViewModel(application), T
 
     init {
         _isRecording.value = false
-        audioFilePath = "${application.externalCacheDir?.absolutePath}/audio.3gp"
         tts = TextToSpeech(application, this)
+        initSpeechRecognizer()
     }
 
-    fun startRecording() {
-        if (_isRecording.value == true) return
+    private fun initSpeechRecognizer() {
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getApplication<Application>())
+        speechRecognizer?.setRecognitionListener(object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {
+                Log.d("MainViewModel", "onReadyForSpeech")
+            }
 
-        mediaRecorder = MediaRecorder().apply {
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-            setOutputFile(audioFilePath)
-            setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-            try {
-                prepare()
-                start()
+            override fun onBeginningOfSpeech() {
+                Log.d("MainViewModel", "onBeginningOfSpeech")
                 _isRecording.value = true
-            } catch (e: IOException) {
-                Log.e("MediaViewModel", "prepare() failed", e)
+            }
+
+            override fun onRmsChanged(rmsdB: Float) {}
+
+            override fun onBufferReceived(buffer: ByteArray?) {}
+
+            override fun onEndOfSpeech() {
+                Log.d("MainViewModel", "onEndOfSpeech")
                 _isRecording.value = false
             }
-        }
-    }
 
-    fun stopRecording() {
-        if (_isRecording.value == false) return
+            override fun onError(error: Int) {
+                Log.e("MainViewModel", "Error: $error")
+                _isRecording.value = false
+            }
 
-        mediaRecorder?.apply {
-            stop()
-            release()
-        }
-        mediaRecorder = null
-        _isRecording.value = false
-    }
-
-    fun transcribeAudio() {
-        viewModelScope.launch {
-            audioFilePath?.let {
-                val wavFilePath = "${getApplication<Application>().externalCacheDir?.absolutePath}/audio.wav"
-                if (convert3gpToWav(it, wavFilePath)) {
-                    val transcriptionText = audioRepository.transcribeAudio(wavFilePath, "en") // Use supported language
-                    if (transcriptionText == null) {
-                        Log.e("MainViewModel", "Transcription failed")
-                    } else {
-                        Log.i("Transcription", "Transcription Successful")
-                        _transcription.value = transcriptionText
-                        getChatGPTResponse(_transcription.value!!)
+            override fun onResults(results: Bundle?) {
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                matches?.let {
+                    if (it.isNotEmpty()) {
+                        _transcription.value = it[0]
+                        getChatGPTResponse(it[0])
                     }
-                } else {
-                    Log.e("MainViewModel", "Audio conversion failed")
                 }
             }
-        }
+
+            override fun onPartialResults(partialResults: Bundle?) {}
+
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        })
     }
 
-    private fun convert3gpToWav(inputPath: String, outputPath: String): Boolean {
-        val command = arrayOf("-y", "-i", inputPath, outputPath)
-        Log.d("FFmpegCommand", "Command: ${command.joinToString(" ")}")
-        return try {
-            val rc = FFmpeg.execute(command)
-            rc == 0
-        } catch (e: Exception) {
-            Log.e("AudioConversion", "Conversion failed", e)
-            false
+    fun startListening() {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH)  // Set to English
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now...")
         }
+        speechRecognizer?.startListening(intent)
     }
 
     private fun getChatGPTResponse(transcription: String) {
@@ -116,7 +109,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application), T
     }
 
     private fun speakText(text: String) {
-        tts?.language = Locale("te", "IN")
+        tts?.language = Locale.ENGLISH  // Set to English
         val result = tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
         if (result == TextToSpeech.ERROR) {
             Log.e("MainViewModel", "Error in converting Text to Speech")
@@ -125,22 +118,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application), T
 
     override fun onCleared() {
         super.onCleared()
-        mediaRecorder?.release()
+        speechRecognizer?.destroy()
         tts?.shutdown()
     }
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            val result = tts?.setLanguage(Locale("te", "IN"))
+            val result = tts?.setLanguage(Locale.ENGLISH)  // Set to English
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                Log.e("MainViewModel", "Telugu language is not supported")
+                Log.e("MainViewModel", "English language is not supported")
             }
         } else {
             Log.e("MainViewModel", "TTS Initialization failed")
         }
-    }
-
-    fun getAudioFilePath(): String? {
-        return audioFilePath
     }
 }

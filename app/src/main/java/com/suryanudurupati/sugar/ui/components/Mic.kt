@@ -58,10 +58,10 @@ fun Mic(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewModel(
         if (microphonePermissionState.status.isGranted) {
             // TODO: Record Audio
             if (isRecording) {
-                mainViewModel.stopRecording()
-                mainViewModel.transcribeAudio()
+//                mainViewModel.stopRecording()
+//                mainViewModel.transcribeAudio()
             } else {
-                mainViewModel.startRecording()
+                mainViewModel.startListening()
             }
             isPlaying = !isPlaying
         } else {

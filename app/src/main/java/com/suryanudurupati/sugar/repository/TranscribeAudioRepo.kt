@@ -41,6 +41,6 @@ class TranscribeAudioRepo {
     }
 
     companion object {
-        private const val APIKEY = ""
+        private const val APIKEY = "sk-proj-LHmpsngP4TnadmvnZIZ1T3BlbkFJqOmhXmr8CYydLmVykMBb"
     }
 }
