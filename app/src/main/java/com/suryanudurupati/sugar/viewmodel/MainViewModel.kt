@@ -2,25 +2,18 @@ package com.suryanudurupati.sugar.viewmodel
 
 import android.app.Application
 import android.content.Intent
-import android.media.MediaPlayer
-import android.media.MediaRecorder
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.arthenica.mobileffmpeg.FFmpeg
 import com.suryanudurupati.sugar.repository.ChatRepo
-import com.suryanudurupati.sugar.repository.TranscribeAudioRepo
 import kotlinx.coroutines.launch
-import java.io.FileOutputStream
-import java.io.IOException
 import java.util.Locale
 
 
@@ -39,8 +32,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application), T
     private val _chatGPTResponse = MutableLiveData<String?>()
     val chatGPTResponse: MutableLiveData<String?> get() = _chatGPTResponse
 
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> get() = _isLoading
+
     init {
         _isRecording.value = false
+        _isLoading.value = false
         tts = TextToSpeech(application, this)
         initSpeechRecognizer()
     }
@@ -64,14 +61,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application), T
             override fun onEndOfSpeech() {
                 Log.d("MainViewModel", "onEndOfSpeech")
                 _isRecording.value = false
+                _isLoading.value = true
+                speechRecognizer?.stopListening() // Stop listening when speech ends
             }
 
             override fun onError(error: Int) {
                 Log.e("MainViewModel", "Error: $error")
                 _isRecording.value = false
+                _isLoading.value = false
             }
 
             override fun onResults(results: Bundle?) {
+                _isRecording.value = false
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 matches?.let {
                     if (it.isNotEmpty()) {
@@ -88,6 +89,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application), T
     }
 
     fun startListening() {
+        stopTTS() // Stop TTS before starting a new recording session
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH)  // Set to English
@@ -99,6 +101,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application), T
     private fun getChatGPTResponse(transcription: String) {
         viewModelScope.launch {
             val response = chatRepo.getChatGPTResponse(transcription)
+            _isLoading.value = false
             if (response == null) {
                 Log.e("MainViewModel", "ChatGPT API call failed")
             } else {
@@ -114,6 +117,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application), T
         if (result == TextToSpeech.ERROR) {
             Log.e("MainViewModel", "Error in converting Text to Speech")
         }
+    }
+
+    private fun stopTTS() {
+        tts?.stop()
     }
 
     override fun onCleared() {

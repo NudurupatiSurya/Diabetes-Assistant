@@ -46,30 +46,26 @@ fun Mic(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewModel(
         iterations = LottieConstants.IterateForever,
     )
 
-    LaunchedEffect(key1 = progress) {
-        if (progress == 1f) {
-            isPlaying = true
-        }
+    LaunchedEffect(isRecording) {
+        isPlaying = isRecording
     }
 
     Log.i("storagePermission:", "" + storagePermissionState.status.isGranted)
 
     Surface(onClick = {
         if (microphonePermissionState.status.isGranted) {
-            // TODO: Record Audio
             if (isRecording) {
-//                mainViewModel.stopRecording()
-//                mainViewModel.transcribeAudio()
+                // Nothing to do, as SpeechRecognizer will handle stopping automatically
             } else {
                 mainViewModel.startListening()
             }
-            isPlaying = !isPlaying
         } else {
             microphonePermissionState.launchPermissionRequest()
             storagePermissionState.launchPermissionRequest()
         }
     }, modifier = modifier) {
-        LottieAnimation(composition = composition,
+        LottieAnimation(
+            composition = composition,
             progress = { if (isPlaying) progress else 0f }
         )
     }

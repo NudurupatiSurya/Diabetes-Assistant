@@ -2,6 +2,7 @@ package com.suryanudurupati.sugar.ui.mainscreen
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.OutlinedCard
@@ -19,17 +20,23 @@ import com.suryanudurupati.sugar.viewmodel.MainViewModel
 @Composable
 fun SpeakBox(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewModel()) {
     val transcribedText by mainViewModel.transcription.observeAsState("")
+    val isLoading by mainViewModel.isLoading.observeAsState(false)
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         Mic(
             Modifier
                 .size(200.dp)
-                .padding(10.dp))
+                .padding(10.dp)
+        )
         OutlinedCard(
             Modifier
                 .fillMaxWidth()
+                .height(100.dp)
                 .padding(10.dp) // TODO:: Add animateContentSize later
         ) {
-            Text("$transcribedText", Modifier.padding(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("$transcribedText", Modifier.padding(10.dp))
+            }
         }
     }
 }
